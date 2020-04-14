@@ -2,10 +2,13 @@
 
 > 施工中，[x] 表示翻译进度
 
-## Overview
-Many of these descriptions and examples come from various resources (see [Acknowledgements](#acknowledgements) section), summarized in my own words.
+## 概览
 
-C++20 includes the following new language features:
+大部分的描述和样例都是从不同的来源收集、改编的。详见 [鸣谢](#鸣谢) 部分。
+
+C++20 有以下语言层面的新特性：
+
+- [x] [concepts 概念](#concepts-概念)
 - [ ] [concepts](#concepts)
 - [ ] [designated initializers](#designated-initializers)
 - [ ] [template syntax for lambdas](#template-syntax-for-lambdas)
@@ -19,7 +22,7 @@ C++20 includes the following new language features:
 - [ ] [immediate functions](#immediate-functions)
 - [ ] [using enum](#using-enum)
 
-C++20 includes the following new library features:
+C++20 有以下库层面的新特性：
 - [ ] [concepts library](#concepts-library)
 - [ ] [synchronized buffered outputstream](#synchronized-buffered-outputstream)
 - [ ] [std::span](#stdspan)
@@ -27,7 +30,7 @@ C++20 includes the following new library features:
 - [ ] [math constants](#math-constants)
 - [ ] [std::is_constant_evaluated](#stdis_constant_evaluated)
 
-C++17 includes the following new language features:
+C++17 有以下语言层面的新特性：
 - [ ] [template argument deduction for class templates](#template-argument-deduction-for-class-templates)
 - [ ] [declaring non-type template parameters with auto](#declaring-non-type-template-parameters-with-auto)
 - [ ] [folding expressions](#folding-expressions)
@@ -43,7 +46,7 @@ C++17 includes the following new language features:
 - [ ] [direct-list-initialization of enums](#direct-list-initialization-of-enums)
 - [ ] [fallthrough, nodiscard, maybe_unused attributes](#fallthrough-nodiscard-maybe_unused-attributes)
 
-C++17 includes the following new library features:
+C++17 有以下库层面的新特性：
 - [ ] [std::variant](#stdvariant)
 - [ ] [std::optional](#stdoptional)
 - [ ] [std::any](#stdany)
@@ -55,7 +58,7 @@ C++17 includes the following new library features:
 - [ ] [splicing for maps and sets](#splicing-for-maps-and-sets)
 - [ ] [parallel algorithms](#parallel-algorithms)
 
-C++14 includes the following new language features:
+C++14 有以下语言层面的新特性：
 - [ ] [binary literals](#binary-literals)
 - [ ] [generic lambda expressions](#generic-lambda-expressions)
 - [ ] [lambda capture initializers](#lambda-capture-initializers)
@@ -65,12 +68,12 @@ C++14 includes the following new language features:
 - [ ] [variable templates](#variable-templates)
 - [ ] [\[\[deprecated\]\] attribute](#deprecated-attribute)
 
-C++14 includes the following new library features:
+C++14 有以下库层面的新特性：
 - [ ] [user-defined literals for standard library types](#user-defined-literals-for-standard-library-types)
 - [ ] [compile-time integer sequences](#compile-time-integer-sequences)
 - [ ] [std::make_unique](#stdmake_unique)
 
-C++11 includes the following new language features:
+C++11 有以下语言层面的新特性：
 - [ ] [move semantics](#move-semantics)
 - [ ] [variadic templates](#variadic-templates)
 - [ ] [rvalue references](#rvalue-references)
@@ -102,7 +105,7 @@ C++11 includes the following new language features:
 - [ ] [trailing return types](#trailing-return-types)
 - [ ] [noexcept specifier](#noexcept-specifier)
 
-C++11 includes the following new library features:
+C++11 有以下库层面的新特性：
 - [ ] [std::move](#stdmove)
 - [ ] [std::forward](#stdforward)
 - [ ] [std::thread](#stdthread)
@@ -120,102 +123,107 @@ C++11 includes the following new library features:
 - [ ] [std::async](#stdasync)
 - [ ] [std::begin/end](#stdbeginend)
 
-## C++20 Language Features
+## C++20 语言层面新特性
 
-### Concepts
-_Concepts_ are named compile-time predicates which constrain types. They take the following form:
-```
-template < template-parameter-list >
-concept concept-name = constraint-expression;
-```
-where `constraint-expression` evaluates to a constexpr Boolean. _Constraints_ should model semantic requirements, such as whether a type is a numeric or hashable. A compiler error results if a given type does not satisfy the concept it's bound by (i.e. `constraint-expression` returns `false`). Because constraints are evaluated at compile-time, they can provide more meaningful error messages and runtime safety.
+### Concepts 概念
+
+**概念**（_Concepts_）是一系列具名的编译时类型约束断言。其形式如下：
+
 ```c++
-// `T` is not limited by any constraints.
+template < 模板形参列表 >
+concept 概念名 = 约束表达式;
+```
+约束表达式会被求值，化成一个布尔类型常量表达式（constexpr Boolean）。**约束**（_Constraints_）应当对语义要求进行建模，比如某类型是否是数值类型/可哈希散列（hashable）。如果给定类型不满足限定其性质的概念（也就是说约束表达式值为 `false`），编译器会报告错误。因为约束是编译期求值的，它们可以提供更过有意义的错误信息和运行时安全保证。
+
+```c++
+// `T` 不受任何约束限制。
 template <typename T>
 concept always_satisfied = true;
-// Limit `T` to integrals.
+// 限制 `T` 为整数类型 (integral)。
 template <typename T>
 concept integral = std::is_integral_v<T>;
-// Limit `T` to both the `integral` constraint and signedness.
+// 限制 `T` 同时满足 `integral` 的约束和有符号约束（即有符号整数）。
 template <typename T>
 concept signed_integral = integral<T> && std::is_signed_v<T>;
-// Limit `T` to both the `integral` constraint and the negation of the `signed_integral` constraint.
+// 限制 `T` 同时满足 `integral` 的约束和 `signed_integral` 的否定（即非有符号的整数）。
 template <typename T>
 concept unsigned_integral = integral<T> && !signed_integral<T>;
 ```
-There are a variety of syntactic forms for enforcing concepts:
+概念支持数种不同的语法形式：
+
 ```c++
-// Forms for function parameters:
-// `T` is a constrained type template parameter.
+// 限定函数参数的形式：
+// `T` 是一个被约束的模板类型形参。
 template <my_concept T>
 void f(T v);
 
-// `T` is a constrained type template parameter.
+// `T` 是一个被约束的模板类型形参。
 template <typename T>
   requires my_concept<T>
 void f(T v);
 
-// `T` is a constrained type template parameter.
+// `T` 是一个被约束的模板类型形参。
 template <typename T>
 void f(T v) requires my_concept<T>;
 
-// `v` is a constrained deduced parameter.
+// `v` 是一个被约束的推导出的形参。
 void f(my_concept auto v);
 
-// `v` is a constrained non-type template parameter.
+// `v` 是一个被约束的非类型模板形参。
 template <my_concept auto v>
 void g();
 
-// Forms for auto-deduced variables:
-// `foo` is a constrained auto-deduced value.
+// 推导类型变量使用的形式：
+// `foo` 是一个被约束的推导出的值。
 my_concept auto foo = ...;
 
-// Forms for lambdas:
-// `T` is a constrained type template parameter.
+// lambda 表达式使用的形式:
+// `T` 是一个被约束的模板类型形参。
 auto f = []<my_concept T> (T v) {
   // ...
 };
-// `T` is a constrained type template parameter.
+// `T` 是一个被约束的模板类型形参。
 auto f = []<typename T> requires my_concept<T> (T v) {
   // ...
 };
-// `T` is a constrained type template parameter.
+// `T` 是一个被约束的模板类型形参。
 auto f = []<typename T> (T v) requires my_concept<T> {
   // ...
 };
-// `v` is a constrained deduced parameter.
+// `v` 是一个被约束的推导出的形参。
 auto f = [](my_concept auto v) {
   // ...
 };
-// `v` is a constrained non-type template parameter.
+// `v` 是一个被约束的非类型模板形参。
 auto g = []<my_concept auto v> () {
   // ...
 };
 ```
-The `requires` keyword is used either to start a requires clause or a requires expression:
+`requires` 关键字可以用在 _requires_ 子句或 _requires_ 表达式开头：
+
 ```c++
 template <typename T>
-  requires my_concept<T> // `requires` clause.
+  requires my_concept<T> // `requires` 子句。
 void f(T);
 
 template <typename T>
-concept callable = requires (T f) { f(); }; // `requires` expression.
+concept callable = requires (T f) { f(); }; // `requires` 表达式。
 
 template <typename T>
-  requires requires (T x) { x + x; } // `requires` clause and expression on same line.
+  requires requires (T x) { x + x; } // 同一行的 `requires` 子句和表达式。
 T add(T a, T b) {
   return a + b;
 }
 ```
-Note that the parameter list in a requires expression is optional. Each requirement in a requires expression are one of the following:
+注意 requires 表达式中的形参列表是可选的。requires 表达式里的每个要求（requirement）是以下数种之一：
 
-* **Simple requirements** - asserts that the given expression is valid.
+* **简单要求（Simple requirements）** — 断言给定表达式合法。
 
 ```c++
 template <typename T>
 concept callable = requires (T f) { f(); };
 ```
-* **Type requirements** - denoted by the `typename` keyword followed by a type name, asserts that the given type name is valid.
+* **类型要求（Type requirements）** — `typename` 关键词后随一个类型名，断言给定类型名合法。
 
 ```c++
 struct foo {
@@ -232,7 +240,7 @@ struct baz {
   value data;
 };
 
-// Using SFINAE, enable if `T` is a `baz`.
+// 利用「替换失败非错误（SFINAE）」规则，在 `T` 为 `baz` 时启用。
 template <typename T, typename = std::enable_if_t<std::is_same_v<T, baz>>>
 struct S {};
 
@@ -241,30 +249,30 @@ using Ref = T&;
 
 template <typename T>
 concept C = requires {
-                     // Requirements on type `T`:
-  typename T::value; // A) has an inner member named `value`
-  typename S<T>;     // B) must have a valid class template specialization for `S`
-  typename Ref<T>;   // C) must be a valid alias template substitution
+                     // 对类型 `T` 的要求：
+  typename T::value; // A) 有一个名为 `value` 的成员
+  typename S<T>;     // B) 必须有一个类模板 `S` 的合法特化
+  typename Ref<T>;   // C) 必须是一个合法的别名模板替换
 };
 
 template <C T>
 void g(T a);
 
-g(foo{}); // ERROR: Fails requirement A.
-g(bar{}); // ERROR: Fails requirement B.
-g(baz{}); // PASS.
+g(foo{}); // 错误: 要求 A 不满足。
+g(bar{}); // 错误: 要求 B 不满足。
+g(baz{}); // OK.
 ```
-* **Compound requirements** - an expression in braces followed by a trailing return type or type constraint.
+* **复合要求（Compound requirements）** — 花括号包括的表达式，后随一个返回类型或类型约束。
 
 ```c++
 template <typename T>
 concept C = requires(T x) {
-  {*x} -> typename T::inner; // the type of the expression `*x` is convertible to `T::inner`
-  {x + 1} -> std::same_as<int>; // the expression `x + 1` satisfies `std::same_as<decltype((x + 1))>`
-  {x * 1} -> T; // the type of the expression `x * 1` is convertible to `T`
+  {*x} -> typename T::inner; // 表达式 `*x` 的类型可以被转换为 `T::inner`
+  {x + 1} -> std::same_as<int>; // 表达式 `x + 1` 满足 `std::same_as<decltype((x + 1))>`
+  {x * 1} -> T; // 表达式 `x * 1` 的类型可以被转换为 `T`
 };
 ```
-* **Nested requirements** - denoted by the `requires` keyword, specify additional constraints (such as those on local parameter arguments).
+* **嵌套要求（Nested requirements）** — 由 `requires` 关键词标注，指定额外约束（例如以局部形参构建的实参）。
 
 ```c++
 template <typename T>
@@ -272,9 +280,10 @@ concept C = requires(T x) {
   requires std::same_as<sizeof(x), size_t>;
 };
 ```
-See also: [concepts library](#concepts-library).
+参见：[concepts library](#concepts-library).
 
 ### Designated initializers
+
 C-style designated initializer syntax. Any member fields that are not explicitly listed in the designated initializer list are default-initialized.
 ```c++
 struct A {
@@ -462,7 +471,7 @@ Concepts are also provided by the standard library for building more complicated
 - `invocable` - specifies that a callable type can be invoked with a given set of argument types.
 - `predicate` - specifies that a callable type is a Boolean predicate.
 
-See also: [concepts](#concepts).
+See also: [concepts 概念](#concepts-概念).
 
 ### Synchronized buffered outputstream
 Buffers output operations for the wrapped output stream ensuring synchronization (i.e. no interleaving of output).
@@ -2035,7 +2044,8 @@ auto a = CountTwos(vec); // 2
 auto b = CountTwos(arr);  // 1
 ```
 
-## Acknowledgements
+## 鸣谢
+
 * [cppreference](http://en.cppreference.com/w/cpp) - especially useful for finding examples and documentation of new library features.
 * [C++ Rvalue References Explained](http://thbecker.net/articles/rvalue_references/section_01.html) - a great introduction I used to understand rvalue references, perfect forwarding, and move semantics.
 * [clang](http://clang.llvm.org/cxx_status.html) and [gcc](https://gcc.gnu.org/projects/cxx-status.html)'s standards support pages. Also included here are the proposals for language/library features that I used to help find a description of, what it's meant to fix, and some examples.
