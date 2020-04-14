@@ -1,9 +1,8 @@
 # C++20/17/14/11
 
-[中文翻译](https://github.com/JoeyTeng/modern-cpp-features/blob/master/README.zh-Hans.md)
+> 施工中
 
 ## Overview
-
 Many of these descriptions and examples come from various resources (see [Acknowledgements](#acknowledgements) section), summarized in my own words.
 
 C++20 includes the following new language features:
